@@ -46,34 +46,7 @@ export const resetUKey = () => {
     setLocalUKey();
     getApiUKey();
 }
-//INFO
-export const useUKeyInfo = () => {
-    return useState('ukeyInfo', () => "...")
-}
-export const setUKeyInfo = (info) => {
-    const ukeyinfo = useUKeyInfo()
-    const ukey = useUKey()
-    //ukeyinfo.value=info
-    const req = { ukey: ukey.value.ukey, uid: ukey.value.uid, info: info }
 
-    return $fetch("/api/ukey/info", { method: 'POST', body: req })
-        .then(resp => {
-            if (resp.set == "SUCCESS") {
-                ukeyinfo.value = resp.info;
-            }
-            return resp
-        }).catch(err => console.log("ERR", err, process))
-}
-
-export const getUKeyInfo = (lookat) => {
-    const ukeyinfo = useUKeyInfo()
-    return $fetch(`/api/ukey/info?ukey=${ukey.value.ukey}&uid=${ukey.value.uid}&lookat=${lookat}&date=${Date.now()}`)
-    .then(resp => {
-        console.log("LISTINFO", resp)
-    })
-
-
-}
 
 //LIST
 export const useUKeyList = () => {

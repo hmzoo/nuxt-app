@@ -20,6 +20,11 @@ export const srvMsg = (ukey, msg, err) => {
     return answer;
 }
 
+// SETS UTIL
+const set_info = (ukey) => ukey + "-info"
+const set_follows = (ukey) => ukey + "-follows"
+const set_followers = (ukey) => ukey + "-followers"
+
 //UKEY
 
 const findFreeUKey = (n) => {
@@ -31,12 +36,24 @@ const findFreeUKey = (n) => {
 }
 
 export const isFreeUKey = (ukey) => {
-
     const redis = new Redis();
-    return redis.hgetall(ukey).then(data => {
+    return redis.hget(ukey,'date').then(rdate => {
         redis.quit();
-        return !(data.date != null && Date.now() - data.date < delay);
+        return !(rdate != null && Date.now() - rdate < delay);
     })
+}
+
+const delUKey = (ukey) => {
+    const redis = new Redis();
+    return redis.del(ukey)
+        .then((r) => redis.del(set_info(ukey)))
+        .then((r) => redis.del(set_follows(ukey)))
+        .then((r) => redis.del(set_followers(ukey)))
+        .then((r) => { redis.quit(); return true })
+        .catch((err) => {
+            redis.quit();
+            return false;
+        })
 }
 
 
@@ -53,7 +70,8 @@ const initUKey = (ukey) => {
         msg: srvprefix + " Welcome " + ukey + " !"
     }
 
-    return redis.hset(ukey, initdata)
+    return delUKey(ukey)
+        .then(r => redis.hset(ukey, initdata))
         .then(r => { redis.quit(); return initdata });
 }
 
@@ -82,12 +100,11 @@ const setUKey = (ukey, data) => {
 export const newUKey = () => {
     return findFreeUKey(0).then(key => {
         if (key == "ERROR") {
-            console.log("SERVER FULL");
-            return { err: "SERVER_FULL", msg: srvprefix + " Server full ! try later ..." };
+            throw new Error('Server Full !')
         } else {
             return initUKey(key)
         }
-    });
+    }).catch(err => { return {} });
 }
 
 export const checkUKey = (ukey, uid) => {
@@ -104,11 +121,19 @@ export const checkUKey = (ukey, uid) => {
 
 }
 
+export const checkParamsAndValidUKey = (ukey, uid) => {
+    return new Promise((resolve) => {
+        if (ukey == null || uid == null) {
+            throw new Error('BAD REQUEST')
+        } else {
+            resolve(validUKey(ukey, uid))
+        }
+    });
+}
+
+
 export const validUKey = (ukey, uid) => {
-    if (ukey == null || uid == null) {
-        console.log("validukey", ukey, uid)
-        return false;
-    }
+    console.log("VALIDUKEY : ", ukey, uid);
     const redis = new Redis();
     return redis.hgetall(ukey).then(data => {
         if (data.uid != null && data.uid == uid && Date.now() - data.date < delay) {
@@ -119,7 +144,7 @@ export const validUKey = (ukey, uid) => {
             redis.quit();
             return false
         }
-    });
+    }).catch(err => { redis.quit(); return false });
 
 }
 
@@ -132,98 +157,132 @@ export const validUKey = (ukey, uid) => {
 
 //Info 
 
-export const setInfoUKey = (ukey, info) => {
+
+
+export const setInfo = (ukey, info) => {
     const redis = new Redis();
-    return redis.set(ukey + "-info", info)
+    return redis.set(set_info(ukey), info)
         .then((resp) => {
             redis.quit();
             if (resp == "OK") { return { info: info, set: "SUCCESS" } } else { return { info: info, set: "FAILED" } }
         }).catch((err) => {
             redis.quit();
+            console.log("setInfo ERR", err.toString())
             return { info: info, set: "FAILED" }
         })
 
 }
 
-export const getInfoUkey = (lookat) => {
+export const getInfo = (lookat) => {
     const redis = new Redis();
-    return redis.get(lookat + "-info")
+    return redis.get(set_info(lookat))
         .then((resp) => {
             redis.quit();
-            console.log("getInfoUkey", lookat, resp, propcess)
             return resp
         }).catch((err) => {
             redis.quit();
-            console.log("getInfoUkey ERR", lookat, resp, propcess)
+            console.log("getInfo ERR", err.toString())
             return ""
         });
 
 }
 
-// List
+// Follow List
 
 
-export const getListUKey = (ukey) => {
-    const lname = ukey + "-list"
+
+
+export const getFollows = (ukey) => {
     const redis = new Redis();
-    return redis.lrange(lname, 0, -1).then(resp => {
+    return redis.smembers(set_follows(ukey)).then(resp => {
+        console.log("GETF",resp)
         redis.quit();
-        console.log("getlistukey", ukey, resp)
         return resp
     }).catch((err) => {
         redis.quit();
-        console.log("getlistukey err", err)
+        console.log("getFollows ERR:",err.toString())
         return []
     });
 }
 
 
-export const addListUKey = (ukey, lookat) => {
-    const lname = ukey + "-list"
+export const addFollow = (ukey, lookat) => {
     const redis = new Redis();
-    return redis.lrem(lname, 0, lookat).then(resp => {
-        console.log("addlist rm", ukey, resp)
-        return redis.lpush(lname, lookat)
-            .then((resp) => {
-                redis.quit();
-                console.log("addlist add", ukey, resp)
-                return true
-            }).catch((err) => {
-                redis.quit();
-                return false
-            });
-    }).catch((err) => {
-        redis.quit();
-        return false
-    });
-}
-
-export const delListUKey = (ukey, lookat) => {
-    const lname = ukey + "-list"
-    const redis = new Redis();
-    return redis.lrem(lname, 0, lookat)
+    return redis.sadd(set_follows(ukey), lookat)
+        .then(redis.sadd(set_followers(lookat), ukey))
         .then((resp) => {
             redis.quit();
             return true
         }).catch((err) => {
             redis.quit();
+            console.log("addFollow ERR:",err.toString())
+            return false
+        });
+
+}
+
+export const delFollow = (ukey, lookat) => {
+    const redis = new Redis();
+    return redis.srem(set_follows(ukey), lookat)
+        .then(redis.srem(set_followers(lookat), ukey))
+        .then((resp) => {
+            redis.quit();
+            return true
+        }).catch((err) => {
+            redis.quit();
+            console.log("delFollow ERR:",err.toString())
             return false
         });
 }
 
-export const  buildListUkey = async (ukey) => {
+export const getFollowers = (ukey) => {
     const redis = new Redis();
-    return getListUKey(ukey)
-        .then((resp) => {
-            console.log("build",resp)
-            let data = []
-            for (let i = 0; i < resp.length;i = i + 1 ) {
-                let info = await redis.get(lookat + "-info")
-                console.log("i",i,info)
-                data.push({ ukey: resp[i], info: info })
-            }
+    return redis.smembers(set_followers(ukey)).then(resp => {
+        redis.quit();
+        console.log("get resp",resp)
+        return resp
+    }).catch((err) => {
+        redis.quit();
+        console.log("getFollowers ERR:",err.toString())
+        return [];
+    });
+}
+
+export const buildFollows = (ukey) => {
+    const redis = new Redis();
+    
+    return getFollows(ukey)
+        .then(async (resp) => {
+            let data = [];
+            const status = await Promise.all(resp.map((itemukey) => {
+                return redis.get(set_info(itemukey)).then(iteminfo => {
+                    iteminfo=iteminfo || ""
+                    data.push({ ukey: itemukey, info: iteminfo })
+                    return "OK"
+                })
+            }))
             redis.quit();
-            return data
-        })
+            return data;
+        }).catch((err) => {
+            redis.quit();
+            console.log("buildListUKey ERR:",err.toString())
+            return [];
+        });
 
 }
+
+export const buildData = (ukey, req) => {
+        req.ukey = ukey;
+        return buildFollows(ukey)
+        .then(respblk => { req.follows = respblk; return req })
+        .then(result => getFollowers(ukey))
+        .then(respgf => { req.followers = respgf; return req })
+        .then(result => getInfo (ukey))
+        .then(respgi => { req.info = respgi ; return req })
+        .catch((err) => {
+             console.log("buildData ERR:",err.toString())
+             return req
+            })
+}
+
+

@@ -2,39 +2,76 @@
 export const useListUKey = () => {
     return useState('listukey', () => [])
 }
+export const useFollowsUKey = () => {
+    return useState('followsukey', () => [])
+}
+export const useFollowersUKey = () => {
+    return useState('followersukey', () => [])
+}
+export const useInfoUKey = () => {
+    return useState('infoukey', () => "...")
+}
+export const useSrvMsgUKey = () => {
+    return useState('infoukey', () => {})
+}
 
-export const addItemListUkey = (lookat) => {
-    const ukey = useUKey('ukey')
 
-    const req = { ukey: ukey.value.ukey, uid: ukey.value.uid, lookat: lookat, cmd:"ADD" }
+//REQUETES POST
 
-    return $fetch("/api/ukey/list", { method: 'POST', body: req })
+const reqItemListUKey = (req)=> {
+    const ukey = useUKey('ukey');
+    req.ukey=ukey.value.ukey;
+    req.uid=ukey.value.uid;
+
+    return $fetch("/api/ukey", { method: 'POST', body: req })
         .then(resp => {
-            console.log("LIST ADD", resp)
-            useListUKey().value=resp.data;
+            console.log("reqlist",req,resp,resp.srvmsg.err )
+            if (resp.srvmsg){
+                useSrvMsgUKey().value=resp.srvmsg
+                if (!resp.srvmsg.err) {
+                    
+                    updateStates(resp)
+                }
+            }
             return resp
         }).catch(err => console.log("ERR", err, process))
-
-    return $fetch(`/api/ukey/list?ukey=${ukey.value.ukey}&uid=${ukey.value.uid}&lookat=${lookat}&date=${Date.now()}`)
-        .then(resp => {
-            console.log("LIST ADD", resp)
-        })
-
-    const item = { ukey: ukey, infos: "OK" }
-
-    if (indexUKeyList(item.ukey) < 0) {
-        useUKeyList().value.push(item)
-    }
 }
 
-export const delItemListUKey = (ukey) => {
-
-    const index = indexListUKey(ukey)
-    if (index > -1) {
-        useListUKey().value.splice(index, 1)
-    }
+export const getAllDataUkey = () => {
+    const req =reqItemListUKey({cmd:"GET"})
 }
 
+export const addFollowUkey = (lookat) => {
+    reqItemListUKey({cmd:"ADD",lookat:lookat})
+}
+
+export const delFollowUKey = (lookat) => {
+    reqItemListUKey({cmd:"DEL",lookat:lookat})
+}
+export const setInfoUKey = (info) => {
+    reqItemListUKey({cmd:"SETINFO",info:info})
+}
+
+// STATES
+
+const updateStates=(data)=> {
+    console.log(data)
+    if(!data){return}
+    if(data.info !== undefined){
+        useInfoUKey().value=data.info || ""
+        console.log(useInfoUKey().value)
+    }
+    if (data.follows !== undefined ){
+        useFollowsUKey().value=data.follows
+    }
+    if (data.followers!== undefined ){
+        useFollowersUKey().value=data.followers
+    }
+    return data
+}
+
+
+//UTILS
 export const indexListUKey = (ukey) => {
     const list = useUKeyList().value
     console.log(list)

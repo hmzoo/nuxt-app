@@ -1,10 +1,15 @@
 <script setup>
-const ukeylist = useListUKey();
-const addukey= (d) => {
-  addItemListUkey(d);
+const followslist = useFollowsUKey();
+const infoukey = useInfoUKey ();
+
+const setInfo = (t) => {
+  setInfoUKey(t);
 };
-const delukey= (d) => {
-  console.log("DEL",d)
+const addukey = (d) => {
+  addFollowUkey(d);
+};
+const delukey = (d) => {
+  delFollowUKey(d);
   //delUKeyList(d);
 };
 </script>
@@ -12,22 +17,29 @@ const delukey= (d) => {
 <template>
   <i-container>
     <i-row>
-      <i-column xs="12"
-        ><div class="_display:flex _flex-direction:row">
-          <Number style="margin:3px"  v-for="(item, index) in ukeylist"
-          :key="'ukey' + index" :title=item.ukey :infos=item.info @onDelete="delukey"/>
+      <i-column xs="12">
+        <div class="_display:flex _flex-direction:row _height:50%">
+          <FollowCard
+            style="margin: 3px"
+            v-for="(item, index) in followslist"
+            :key="'ukey' + index"
+            :ukey="item.ukey"
+            :info="item.info"
+            @onDelete="delukey"
+          />
         </div>
       </i-column>
     </i-row>
     <i-row center>
-      <i-column xs="6" style="height:200px">
-        <InputNumber infos="..." @onSubmit="addukey" />
+      <i-column xs="6" style="height: 100px">
+        <FollowInput @onSubmit="addukey" />
       </i-column>
     </i-row>
-      
+
     <i-row center>
       <i-column xs="6">
-        <InputInfo />
+       {{ followslist}}
+        <InfoInput @onSubmit="setInfo" :info="infoukey"  />
       </i-column>
     </i-row>
   </i-container>
