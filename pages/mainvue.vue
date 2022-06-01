@@ -18,7 +18,7 @@ const delukey = (d) => {
   <i-container>
     <i-row>
       <i-column xs="12">
-        <div class="_display:flex _flex-direction:row _height:50%">
+        <div class="_display:flex _flex-direction:row " style="border:solid;border-width:2px;border-color: blueviolet;height:300px;margin:10px">
           <FollowCard
             style="margin: 3px"
             v-for="(item, index) in followslist"

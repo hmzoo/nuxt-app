@@ -48,43 +48,5 @@ export const resetUKey = () => {
 }
 
 
-//LIST
-export const useUKeyList = () => {
-    return useState('ukeylist', () => [])
-}
 
-export const addUKeyList = (lookat) => {
-    const ukey = useUKey('ukey')
-
-    return $fetch(`/api/ukey/list?ukey=${ukey.value.ukey}&uid=${ukey.value.uid}&lookat=${lookat}&date=${Date.now()}`)
-        .then(resp => {
-            console.log("LIST", resp)
-        })
-
-    const item = { ukey: ukey, infos: "OK" }
-
-    if (indexUKeyList(item.ukey) < 0) {
-        useUKeyList().value.push(item)
-    }
-}
-
-export const delUKeyList = (ukey) => {
-
-    const index = indexUKeyList(ukey)
-    if (index > -1) {
-        useUKeyList().value.splice(index, 1)
-    }
-}
-
-export const indexUKeyList = (ukey) => {
-    const list = useUKeyList().value
-    console.log(list)
-    for (var i = 0; i < list.length; i++) {
-
-        if (list[i].ukey == ukey) {
-            return i
-        }
-    }
-    return -1
-}
 
