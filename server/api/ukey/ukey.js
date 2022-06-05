@@ -286,3 +286,10 @@ export const buildData = (ukey, req) => {
 }
 
 
+//Reply
+
+const Reply=(msg, err)=>{
+    const reply = { info:"",follows: [], followers: [], srvmsg: { msg: msg } }
+    if (err != null) { reply.srvmsg.err = err }
+    return reply
+}

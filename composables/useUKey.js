@@ -1,13 +1,16 @@
 
 const emptyUKey = {
     ukey: "000000",
-    uid: "xxx-xxx-xxx",
-    msg: "No ID !"
+    uid: "xxx-xxx-xxx"
 }
 
 
 export const useUKey = () => {
     return useState('ukey', () => emptyUKey)
+}
+
+export const useSrvMsg = () => {
+    return useState('srvmsg', () => {return {msg:'',err :''}})
 }
 
 export const getLocalUKey = () => {
@@ -32,7 +35,11 @@ export const getApiUKey = () => {
     const date = Date.now()
     return $fetch(`/api/ukey?ukey=${ukey.value.ukey}&uid=${ukey.value.uid}&date=${date}`)
         .then(resp => {
+            if(resp.srvmsg){
+                useSrvMsg().value = resp.srvmsg  
+            }
             ukey.value = resp
+            console.log(resp);
             setLocalUKey();
             return resp;
         })

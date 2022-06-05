@@ -17,6 +17,28 @@ reponse :
 
 */  
 
+const apiRestoreSession = (ukey) => {
+  return buildData(ukey, Reply("Welcome Back "+ukey, null))
+  .catch(err => Reply("Session Restoration failed", err.toString()))
+}
+
+const apiNewSession =() => {
+  return findFreeUKey(0).then(key => {
+    if (key == "ERROR") {
+        return Reply("Connection Failed","SERVER FULL!")
+    } else {
+        return initUKey(key).then(resp => {
+          let reply = Reply("Welcome "+resp.ukey)
+          reply.ukey= resp.ukey
+          reply.uid= resp.uid
+          return reply
+        }
+    }
+})
+}
+
+
+
 
 export default defineEventHandler((event) => {
 
@@ -25,11 +47,9 @@ export default defineEventHandler((event) => {
     return checkParamsAndValidUKey(query.ukey, query.uid).then( (valid) => {
         console.log("API UKEY VALID : ", valid);
         if(valid){
-            return {ukey:query.ukey,uid:query.uid,msg:"> Welcome back " + query.ukey + " !",srvmsg: srvMsg(query.ukey, "USING SAME ID")};
+            return apiRestoreSession(query.ukey)
         }else{
-            return newUKey().then( data => {
-                return {ukey:data.ukey,uid:data.uid,msg:"> Welcome " + data.ukey + " !",srvmsg: srvMsg(data.ukey, "USING NEW ID")};
-            });
+            return apiNewSession()
         }
       }).catch((err) =>{return {ukey:"",uid:"",msg:"SERVER ERROR !!",srvmsg: srvMsg(query.ukey, "ID REQUEST FAILED",err.toString())}; })
     });

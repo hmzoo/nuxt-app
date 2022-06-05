@@ -1,4 +1,4 @@
-import {  isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow ,setInfo} from './ukey';
+import {  isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow ,setInfon,Reply} from './ukey';
 
 /*****************************************************************************************
 
@@ -34,12 +34,12 @@ const switchCmd = (req) => {
             return apiDelFollow(req.ukey, req.lookat);
       }
       if (req.cmd == "GET") {
-            return buildData(req.ukey, initReply("LIST LOADED", null))
+            return buildData(req.ukey, Reply("LIST LOADED", null))
       }
       if (req.cmd == "SETINFO" && req.info !=null) {
             return apiSetInfo(req.ukey,req.info)
       }
-      return initReply("LIST FAILED !!", "BAD REQUEST");
+      return Reply("LIST FAILED !!", "BAD REQUEST");
 
 }
 
@@ -50,17 +50,17 @@ const apiAddFollow = (ukey, lookat) => {
 
       return isFreeUKey(lookat).then((free) => {
             if (free) {
-                  return buildData(ukey, initReply("NOBODY AT " + lookat, null))
+                  return buildData(ukey, tReply("NOBODY AT " + lookat, null))
             } else {
                   return addFollow(ukey, lookat).then((done) => {
                         if (done) {
-                              return buildData(ukey, initReply(lookat + " ADDED", null))
+                              return buildData(ukey, Reply(lookat + " ADDED", null))
                         } else {
-                              return initReply(lookat + " ADD FAILED", "SERVER ERROR");
+                              return Reply(lookat + " ADD FAILED", "SERVER ERROR");
                         }
                   });
             }
-      }).catch(err => initReply("ADDLIST FAILED !", err.toString()))
+      }).catch(err => Reply("ADDLIST FAILED !", err.toString()))
 
 }
 
@@ -68,9 +68,9 @@ const apiAddFollow = (ukey, lookat) => {
 const apiDelFollow= (ukey, lookat) => {
       return delFollow(ukey, lookat).then((done) => {
             if (done) {
-                  return buildData(ukey, initReply(lookat + " REMOVED", null))
+                  return buildData(ukey, Reply(lookat + " REMOVED", null))
             } else {
-                  return initReply(lookat + " DELETE FAILED", "SERVER ERROR")
+                  return Reply(lookat + " DELETE FAILED", "SERVER ERROR")
             }
       })
 }
@@ -79,19 +79,8 @@ const apiDelFollow= (ukey, lookat) => {
 const apiSetInfo = (ukey, info) => {
       return setInfo(ukey, info)
         .then((resp) => {
-           return buildData(ukey, initReply("INFO UPDATED", null))
-      }).catch(err => initReply("SET INFO FAILED !", err.toString()))
-      
-
-
-}
-
-
-
-const initReply=(msg, err)=>{
-      const reply = { info:"",follows: [], followers: [], srvmsg: { msg: msg } }
-      if (err != null) { reply.srvmsg.err = err }
-      return reply
+           return buildData(ukey, Reply("INFO UPDATED", null))
+      }).catch(err => Reply("SET INFO FAILED !", err.toString()))
 }
 
 
@@ -102,8 +91,8 @@ export default defineEventHandler((event) => {
                   if (valid && bodyreq.cmd != null) {
                         return switchCmd(bodyreq);
                   }else {
-                        return initReply("CMDLIST FAILED !", "BAD REQUEST");
+                        return Reply("CMDLIST FAILED !", "BAD REQUEST");
                   }
             });
-      }).catch((err) => initReply("LIST REQUEST FAILED", err.toString()))
+      }).catch((err) => Reply("LIST REQUEST FAILED", err.toString()))
 })
