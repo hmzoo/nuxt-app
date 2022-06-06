@@ -105,3 +105,4 @@ dist
 
 #nuxt repo 
 .nuxt
+.output

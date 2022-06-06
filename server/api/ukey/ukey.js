@@ -3,16 +3,32 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 
+const user = process.env.REDIS_PASSWORD ? `default:${process.env.REDIS_PASSWORD}` : 'default'
+const host = process.env.REDIS_HOST || 'localhost'
+const port = process.env.REDIS_PORT || '6379'
+const prefix = process.env.REDIS_PREFIX || 'dev'
 
+
+
+const options = `rediss://${user}@${host}:${port}`
+
+const getredis = () =>{
+    console.log("REDIS_HOST",host)
+    
+    return new Redis({
+        connection: options
+      });
+}
 
 const delay = 60000;
 const ranUKey = () => { return "" + (Math.floor(Math.random() * 10)); }
 
 
 // SETS UTIL
-const set_info = (ukey) => ukey + "-info"
-const set_follows = (ukey) => ukey + "-follows"
-const set_followers = (ukey) => ukey + "-followers"
+const set_ukey = (ukey) => prefix+"-"+ukey 
+const set_info = (ukey) => prefix+"-"+ukey + "-info"
+const set_follows = (ukey) => prefix+"-"+ukey + "-follows"
+const set_followers = (ukey) => prefix+"-"+ukey + "-followers"
 
 //UKEY
 
@@ -25,16 +41,16 @@ const findFreeUKey = (n) => {
 }
 
 export const isFreeUKey = (ukey) => {
-    const redis = new Redis();
-    return redis.hget(ukey,'date').then(rdate => {
+    const redis = getredis();
+    return redis.hget(set_ukey(ukey),'date').then(rdate => {
         redis.quit();
         return !(rdate != null && Date.now() - rdate < delay);
     })
 }
 
 export const delUKey = (ukey) => {
-    const redis = new Redis();
-    return redis.del(ukey)
+    const redis = getredis();
+    return redis.del(set_ukey(ukey))
         .then((r) => redis.del(set_info(ukey)))
         .then((r) => redis.del(set_follows(ukey)))
         .then((r) => redis.del(set_followers(ukey)))
@@ -49,7 +65,7 @@ export const delUKey = (ukey) => {
 // Initialisation de la clef
 const initUKey = (ukey) => {
 
-    const redis = new Redis();
+    const redis = getredis();
 
     const initdata = {
         ukey: ukey,
@@ -60,7 +76,7 @@ const initUKey = (ukey) => {
     }
 
     return delUKey(ukey)
-        .then(r => redis.hset(ukey, initdata))
+        .then(r => redis.hset(set_ukey(ukey), initdata))
         .then(r => { redis.quit(); return initdata });
 }
 
@@ -97,12 +113,12 @@ export const checkParamsAndValidUKey = (ukey, uid) => {
 
 const validUKey = (ukey, uid) => {
     console.log("VALIDUKEY : ", ukey, uid);
-    const redis = new Redis();
-    return redis.hgetall(ukey).then(data => {
+    const redis = getredis();
+    return redis.hgetall(set_ukey(ukey)).then(data => {
         if (data.uid != null && data.uid == uid && Date.now() - data.date < delay) {
             data.date = Date.now();
             data.cptsecu = data.cptsecu + 1;
-            return redis.hset(ukey, data).then(r => { redis.quit(); return true });
+            return redis.hset(set_ukey(ukey), data).then(r => { redis.quit(); return true });
         } else {
             redis.quit();
             return false
@@ -123,7 +139,7 @@ const validUKey = (ukey, uid) => {
 
 
 export const setInfo = (ukey, info) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.set(set_info(ukey), info)
         .then((resp) => {
             redis.quit();
@@ -137,7 +153,7 @@ export const setInfo = (ukey, info) => {
 }
 
 export const getInfo = (lookat) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.get(set_info(lookat))
         .then((resp) => {
             redis.quit();
@@ -153,7 +169,7 @@ export const getInfo = (lookat) => {
 // Follow List
 
 export const getFollows = (ukey) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.smembers(set_follows(ukey)).then(resp => {
         console.log("GETF",resp)
         redis.quit();
@@ -167,7 +183,7 @@ export const getFollows = (ukey) => {
 
 
 export const addFollow = (ukey, lookat) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.sadd(set_follows(ukey), lookat)
         .then(redis.sadd(set_followers(lookat), ukey))
         .then((resp) => {
@@ -182,7 +198,7 @@ export const addFollow = (ukey, lookat) => {
 }
 
 export const delFollow = (ukey, lookat) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.srem(set_follows(ukey), lookat)
         .then(redis.srem(set_followers(lookat), ukey))
         .then((resp) => {
@@ -196,7 +212,7 @@ export const delFollow = (ukey, lookat) => {
 }
 
 export const getFollowers = (ukey) => {
-    const redis = new Redis();
+    const redis = getredis();
     return redis.smembers(set_followers(ukey)).then(resp => {
         redis.quit();
         console.log("get resp",resp)
@@ -209,7 +225,7 @@ export const getFollowers = (ukey) => {
 }
 
 export const checkFollowers =(ukey) =>{
-    const redis = new Redis();
+    const redis = getredis();
     return getFollowers(ukey)
          .then(async (resp) =>{
             const status = await Promise.all(resp.map((itemukey) => {
@@ -224,7 +240,7 @@ export const checkFollowers =(ukey) =>{
 }
 
 export const buildFollows = (ukey) => {
-    const redis = new Redis();
+    const redis = getredis();
     
     return getFollows(ukey)
         .then(async (resp) => {
