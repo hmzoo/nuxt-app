@@ -10,14 +10,14 @@ const prefix = process.env.REDIS_PREFIX || 'dev'
 
 
 
-const options = `rediss://${user}@${host}:${port}`
+const redis_url = `rediss://${user}@${host}:${port}`
+const redis_options={ tls : {},connectTimeout: 30000}
 
 const getredis = () =>{
     console.log("REDIS_HOST",host)
+    console.log("redis_url",redis_url)
     
-    return new Redis({
-        connection: options
-      });
+    return new Redis(redis_url,redis_options);
 }
 
 const delay = 60000;
