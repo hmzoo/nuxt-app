@@ -13,6 +13,7 @@
   "dependencies": {
     "@inkline/inkline": "^3.0.8",
     "@inkline/nuxt": "^3.1.0",
+    "simple-peer": "^9.11.1",
     "uuid": "^8.3.2"
   }
 }

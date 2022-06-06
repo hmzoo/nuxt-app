@@ -1,4 +1,4 @@
-import {  isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow ,setInfon,Reply} from './ukey';
+import { isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow, setInfo, delUKey,newUKey, Reply } from './ukey';
 
 /*****************************************************************************************
 
@@ -34,12 +34,15 @@ const switchCmd = (req) => {
             return apiDelFollow(req.ukey, req.lookat);
       }
       if (req.cmd == "GET") {
-            return buildData(req.ukey, Reply("LIST LOADED", null))
+            return buildData(req.ukey, Reply("", null))
       }
-      if (req.cmd == "SETINFO" && req.info !=null) {
-            return apiSetInfo(req.ukey,req.info)
+      if (req.cmd == "SETINFO" && req.info != null) {
+            return apiSetInfo(req.ukey, req.info)
       }
-      return Reply("LIST FAILED !!", "BAD REQUEST");
+      if (req.cmd == "RENEWID") {
+            return apiRenewID(req.ukey)
+      }
+      return Reply("REQUEST FAILED !!", "BAD REQUEST");
 
 }
 
@@ -50,7 +53,7 @@ const apiAddFollow = (ukey, lookat) => {
 
       return isFreeUKey(lookat).then((free) => {
             if (free) {
-                  return buildData(ukey, tReply("NOBODY AT " + lookat, null))
+                  return buildData(ukey, Reply("NOBODY AT " + lookat, null))
             } else {
                   return addFollow(ukey, lookat).then((done) => {
                         if (done) {
@@ -65,7 +68,7 @@ const apiAddFollow = (ukey, lookat) => {
 }
 
 // supression d'un item
-const apiDelFollow= (ukey, lookat) => {
+const apiDelFollow = (ukey, lookat) => {
       return delFollow(ukey, lookat).then((done) => {
             if (done) {
                   return buildData(ukey, Reply(lookat + " REMOVED", null))
@@ -78,10 +81,24 @@ const apiDelFollow= (ukey, lookat) => {
 // Mise à jour des informations
 const apiSetInfo = (ukey, info) => {
       return setInfo(ukey, info)
-        .then((resp) => {
-           return buildData(ukey, Reply("INFO UPDATED", null))
-      }).catch(err => Reply("SET INFO FAILED !", err.toString()))
+            .then((resp) => {
+                  return buildData(ukey, Reply("INFO UPDATED", null))
+            }).catch(err => Reply("SET INFO FAILED !", err.toString()))
 }
+
+// Renouvellement d ID
+const apiRenewID = (ukey) => {
+      return delUKey(ukey)
+            .then((done) => {
+                  return newUKey().then(resp => {
+                        let reply = Reply("New ID " + resp.ukey)
+                        reply.ukey = resp.ukey
+                        reply.uid = resp.uid
+                        return reply
+                  }).catch(err => Reply("GET NEW ID FAILED !", err.toString()))
+            })
+}
+
 
 
 export default defineEventHandler((event) => {
@@ -90,7 +107,7 @@ export default defineEventHandler((event) => {
             return checkParamsAndValidUKey(bodyreq.ukey, bodyreq.uid).then((valid) => {
                   if (valid && bodyreq.cmd != null) {
                         return switchCmd(bodyreq);
-                  }else {
+                  } else {
                         return Reply("CMDLIST FAILED !", "BAD REQUEST");
                   }
             });

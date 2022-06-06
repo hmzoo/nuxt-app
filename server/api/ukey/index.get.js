@@ -1,4 +1,4 @@
-import { srvMsg,checkParamsAndValidUKey, newUKey } from './ukey';
+import { checkParamsAndValidUKey,newUKey,buildData,Reply} from './ukey';
 
 /* API GET : recupéré le ukey
 requete :
@@ -9,7 +9,6 @@ reponse :
   uid:uid,
   msg:msg
   srvmsg : {
-            ukey : ukey,
             msg : msg,
             err : err
            }
@@ -23,19 +22,16 @@ const apiRestoreSession = (ukey) => {
 }
 
 const apiNewSession =() => {
-  return findFreeUKey(0).then(key => {
-    if (key == "ERROR") {
-        return Reply("Connection Failed","SERVER FULL!")
-    } else {
-        return initUKey(key).then(resp => {
+        return newUKey().then(resp => {
           let reply = Reply("Welcome "+resp.ukey)
           reply.ukey= resp.ukey
           reply.uid= resp.uid
           return reply
-        }
-    }
-})
+    }).catch(err => Reply("New session failed", err.toString()))
+
+    
 }
+
 
 
 
@@ -51,5 +47,5 @@ export default defineEventHandler((event) => {
         }else{
             return apiNewSession()
         }
-      }).catch((err) =>{return {ukey:"",uid:"",msg:"SERVER ERROR !!",srvmsg: srvMsg(query.ukey, "ID REQUEST FAILED",err.toString())}; })
+      }).catch((err) => Reply("Server connexion error", err.toString()))
     });

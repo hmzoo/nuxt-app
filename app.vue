@@ -13,6 +13,7 @@ useHead({
 const ukey = useUKey();
 onMounted(() => {
   getApiUKey();
+  setInterval(()=>getAllDataUkey(),20000)
   console.log("APP Mounted ukey:",ukey.value);
 })
 /*
@@ -33,10 +34,11 @@ const { data } = await useFetch('/api/ukey',{params: {ukey:numid.value.ukey,uid:
     <i-layout-header>
       <i-container>
       <i-row>
-        <i-column xs="9">
+        <i-column xs="7">
           <Nav /> 
         </i-column>
-        <i-column xs="3"> <NumID showReset="true" />  </i-column>
+        <i-column xs="3"> <UKeyID showReset="true" />  </i-column>
+        <i-column xs="2"> <SrvMsg />  </i-column>
       </i-row>
       </i-container>
     </i-layout-header>

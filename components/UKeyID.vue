@@ -4,7 +4,7 @@ const props = defineProps({
 });
 const ukey = useUKey();
 const newid= () => {
-  resetUKey();
+  renewIDUKey();
   //getApiUKey();
   }
 

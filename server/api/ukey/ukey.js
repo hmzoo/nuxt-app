@@ -5,20 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 
-const delay = 600000;
-const srvprefix = ">";
-
+const delay = 60000;
 const ranUKey = () => { return "" + (Math.floor(Math.random() * 10)); }
 
-//UTIL
-export const srvMsg = (ukey, msg, err) => {
-    const answer = {
-        ukey: ukey,
-        msg: msg,
-    }
-    if (err != null) { answer.err = err; }
-    return answer;
-}
 
 // SETS UTIL
 const set_info = (ukey) => ukey + "-info"
@@ -43,7 +32,7 @@ export const isFreeUKey = (ukey) => {
     })
 }
 
-const delUKey = (ukey) => {
+export const delUKey = (ukey) => {
     const redis = new Redis();
     return redis.del(ukey)
         .then((r) => redis.del(set_info(ukey)))
@@ -67,7 +56,7 @@ const initUKey = (ukey) => {
         uid: uuidv4(),
         date: Date.now(),
         cptsecu: 0,
-        msg: srvprefix + " Welcome " + ukey + " !"
+        msg: " Welcome " + ukey + " !"
     }
 
     return delUKey(ukey)
@@ -75,23 +64,9 @@ const initUKey = (ukey) => {
         .then(r => { redis.quit(); return initdata });
 }
 
-export const getUKey = (ukey, uid) => {
-    const redis = new Redis();
-    return redis.hgetall(ukey).then(data => {
-        redis.quit();
-        if (data.uid != null && data.uid == uid && Date.now() - data.date < delay) {
-            return data;
-        } else {
-            return {}
-        }
-    });
-}
 
-const setUKey = (ukey, data) => {
-    const redis = new Redis();
-    return redis.hset(ukey, data)
-        .then(r => { redis.quit(); return data });
-}
+
+
 
 // une clef disponible est recherchée
 // un message est renvoyé si plus de clef disponible
@@ -104,22 +79,10 @@ export const newUKey = () => {
         } else {
             return initUKey(key)
         }
-    }).catch(err => { return {} });
+    })
 }
 
-export const checkUKey = (ukey, uid) => {
-    console.log("CHECK", ukey, uid)
-    return getUKey(ukey, uid).then(data => {
-        if (data.uid != null) {
-            data.date = Date.now();
-            data.cptsecu = data.cptsacu + 1;
-            return setUKey(ukey, data)
-        } else {
-            return {}
-        }
-    });
 
-}
 
 export const checkParamsAndValidUKey = (ukey, uid) => {
     return new Promise((resolve) => {
@@ -132,7 +95,7 @@ export const checkParamsAndValidUKey = (ukey, uid) => {
 }
 
 
-export const validUKey = (ukey, uid) => {
+const validUKey = (ukey, uid) => {
     console.log("VALIDUKEY : ", ukey, uid);
     const redis = new Redis();
     return redis.hgetall(ukey).then(data => {
@@ -188,9 +151,6 @@ export const getInfo = (lookat) => {
 }
 
 // Follow List
-
-
-
 
 export const getFollows = (ukey) => {
     const redis = new Redis();
@@ -248,6 +208,21 @@ export const getFollowers = (ukey) => {
     });
 }
 
+export const checkFollowers =(ukey) =>{
+    const redis = new Redis();
+    return getFollowers(ukey)
+         .then(async (resp) =>{
+            const status = await Promise.all(resp.map((itemukey) => {
+                return isFreeUKey(itemukey).then(free => {
+                    if(free){redis.srem(set_followers(ukey), itemukey)}
+                    return "OK"
+                })
+            }))
+            redis.quit()
+         })
+
+}
+
 export const buildFollows = (ukey) => {
     const redis = new Redis();
     
@@ -256,7 +231,7 @@ export const buildFollows = (ukey) => {
             let data = [];
             const status = await Promise.all(resp.map((itemukey) => {
                 return redis.get(set_info(itemukey)).then(iteminfo => {
-                    iteminfo=iteminfo || ""
+                    iteminfo=iteminfo || "DOWN"
                     data.push({ ukey: itemukey, info: iteminfo })
                     return "OK"
                 })
@@ -275,6 +250,7 @@ export const buildData = (ukey, req) => {
         req.ukey = ukey;
         return buildFollows(ukey)
         .then(respblk => { req.follows = respblk; return req })
+        .then(result => checkFollowers(ukey))
         .then(result => getFollowers(ukey))
         .then(respgf => { req.followers = respgf; return req })
         .then(result => getInfo (ukey))
@@ -288,7 +264,7 @@ export const buildData = (ukey, req) => {
 
 //Reply
 
-const Reply=(msg, err)=>{
+export const Reply=(msg, err)=>{
     const reply = { info:"",follows: [], followers: [], srvmsg: { msg: msg } }
     if (err != null) { reply.srvmsg.err = err }
     return reply
