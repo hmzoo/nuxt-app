@@ -1,3 +1,11 @@
 import Peer from 'peerjs'
 
-export default Peer
+
+
+export default defineNuxtPlugin(() => {
+  return {
+    provide: {
+      hello: () => 'world'
+    }
+  }
+})
