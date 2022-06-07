@@ -43,6 +43,7 @@ const getMedia =()=>{
      audio: micro_status.value
      }
     console.log(constrains)
+    console.log("navigator.mediaDevices.",navigator.mediaDevices)
     navigator.mediaDevices.getUserMedia(constrains).then(stream =>{
      window.selfStream = stream;
  

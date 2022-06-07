@@ -14,10 +14,17 @@ const redis_url = `rediss://${user}@${host}:${port}`
 const redis_options={ tls : {},connectTimeout: 30000}
 
 const getredis = () =>{
-    console.log("REDIS_HOST",host)
-    console.log("redis_url",redis_url)
     
-    return new Redis(redis_url,redis_options);
+    let url = 'redis://localhost:6379'
+    let options = {}
+
+    if(host != 'localhost'){
+        console.log("redis_url",redis_url)
+        options=redis_options
+        url=redis_url
+    }
+    
+    return new Redis(url,options);
 }
 
 const delay = 60000;
