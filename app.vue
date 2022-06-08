@@ -1,4 +1,5 @@
 <script setup>
+const {  $getPeer } = useNuxtApp();
 useHead({
   titleTemplate: "My App - %s",
 
@@ -15,6 +16,14 @@ onMounted(() => {
   getApiUKey();
   setInterval(()=>getAllDataUkey(),20000)
   console.log("APP Mounted ukey:",ukey.value);
+  const peer = $getPeer()
+  peer.on('open', function(id) {
+	console.log('My peer ID is: ' + id);
+  setInfoUKey(id)
+  });
+
+
+  
 })
 /*
 const { data } = await useFetch('/api/ukey',{params: {ukey:numid.value.ukey,uid:numid.value.uid}, pick:['ukey','uid']})
