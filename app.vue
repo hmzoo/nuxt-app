@@ -1,5 +1,5 @@
 <script setup>
-const {  $getPeer } = useNuxtApp();
+const {  $peer } = useNuxtApp();
 useHead({
   titleTemplate: "My App - %s",
 
@@ -16,11 +16,18 @@ onMounted(() => {
   getApiUKey();
   setInterval(()=>getAllDataUkey(),20000)
   console.log("APP Mounted ukey:",ukey.value);
-  const peer = $getPeer()
-  peer.on('open', function(id) {
+  //const peer = $getPeer()
+  $peer.on('open', function(id) {
 	console.log('My peer ID is: ' + id);
   setInfoUKey(id)
   });
+
+  $peer.on('connection', function(conn) {
+      conn.on('data', function(data){
+      // Will print 'hi!'
+      console.log("Conn Id",conn.id,"Peer data: ",data);
+     });
+});
 
 
   
