@@ -1,5 +1,5 @@
 <script setup>
-const {  $peer } = useNuxtApp();
+const { $peer ,$addConn} = useNuxtApp();
 useHead({
   titleTemplate: "My App - %s",
 
@@ -14,24 +14,25 @@ useHead({
 const ukey = useUKey();
 onMounted(() => {
   getApiUKey();
-  setInterval(()=>getAllDataUkey(),20000)
-  console.log("APP Mounted ukey:",ukey.value);
-  //const peer = $getPeer()
-  $peer.on('open', function(id) {
-	console.log('My peer ID is: ' + id);
-  setInfoUKey(id)
+  setInterval(() => getAllDataUkey(), 20000);
+
+  console.log("APP Mounted ukey:", ukey.value);
+  $peer.on("open", function (id) {
+    console.log("My peer ID is: " + id);
+    setInfoUKey(id);
   });
 
-  $peer.on('connection', function(conn) {
-      conn.on('data', function(data){
-      // Will print 'hi!'
-      console.log("Conn Id",conn.id,"Peer data: ",data);
-     });
+  $peer.on("connection", function (conn) {
+    console.log("Conn", conn)
+    $addConn(conn.peer,conn)
+    conn.on("data", function (data) {
+      console.log("Conn", conn.peer, "Peer data: ", data);
+      addPeerMessage(conn.peer,data)
+    });
+    conn.send("Hello from Receiver")
+
+  });
 });
-
-
-  
-})
 /*
 const { data } = await useFetch('/api/ukey',{params: {ukey:numid.value.ukey,uid:numid.value.uid}, pick:['ukey','uid']})
     .then( (resp) => {
@@ -49,13 +50,13 @@ const { data } = await useFetch('/api/ukey',{params: {ukey:numid.value.ukey,uid:
   <i-layout>
     <i-layout-header>
       <i-container>
-      <i-row>
-        <i-column xs="7">
-          <Nav /> 
-        </i-column>
-        <i-column xs="3"> <UKeyID showReset="true" />  </i-column>
-        <i-column xs="2"> <SrvMsg />  </i-column>
-      </i-row>
+        <i-row>
+          <i-column xs="7">
+            <Nav />
+          </i-column>
+          <i-column xs="3"> <UKeyID showReset="true" /> </i-column>
+          <i-column xs="2"> <SrvMsg /> </i-column>
+        </i-row>
       </i-container>
     </i-layout-header>
 

@@ -1,45 +1,34 @@
 <script setup>
-const { $peer } = useNuxtApp();
-
+const { $peer, $addConn,$getConn } = useNuxtApp();
 const cxninput = ref("");
+const msginput = ref("");
 
-/*
-onMounted(() => {
-    cxninput.value = "OKETO"
-  peer = $getPeer();
+const infoukey = useInfoUKey();
+const selectedfollow = useSelectedFollow();
 
-  peer.on('open', function(id) {
-	console.log('My peer ID is: ' + id);
-  });
+const onSubmitMsg = () => {
+  if (typeof $getConn !== "undefined") {
+    const conn=$getConn(selectedfollow.value);
+    if(conn!=null){
+      conn.send(msginput.value);
+    }
+  }
+};
 
-  var conn = peer.connect("another-peers-id");
-  // on open will be launch when you successfully connect to PeerServer
-  conn.on("open", function () {
-    // here you have conn.id
-    conn.send("hi!");
-  });
-
-  peer.on("connection", function (conn) {
-    conn.on("data", function (data) {
-      // Will print 'hi!'
-      console.log(data);
-    });
-  });
-
-
-
-
-});
-*/
-const onSubmit = () => {
+const onSubmitCxn = () => {
   console.log("ok submit", cxninput.value);
+
   if (typeof $peer !== "undefined") {
     console.log("PEER READY");
     var conn = $peer.connect(cxninput.value);
-    // on open will be launch when you successfully connect to PeerServer
     conn.on("open", function () {
-      console.log("conn.id",conn.id)
-      conn.send("hi!");
+      console.log("conn", conn);
+       $addConn(conn.peer,conn)
+      conn.send("Hello from Sender");
+    });
+    conn.on("data", function (data) {
+      console.log("Conn", conn, "Peer data: ", data);
+      addPeerMessage(conn.peer,data)
     });
   }
 };
@@ -47,16 +36,21 @@ const onSubmit = () => {
 
 <template>
   <i-container>
-    <i-row> <i-column>peerjs </i-column> </i-row>
     <i-row>
-      <i-column>
-        <i-form @submit="onSubmit" size="md">
+      <i-column>peerjs {{ infoukey }} to {{ selectedfollow }}</i-column>
+    </i-row>
+    <i-row>
+      <i-column><PMsgList /></i-column>
+    </i-row>
+    <i-row>
+      <i-column xs="6">
+        <i-form @submit="onSubmitCxn" size="md">
           <i-form-group inline>
             <i-form-label>CXN</i-form-label>
             <i-input
               name="cxninput"
               v-model="cxninput"
-              placeholder="Type info ..."
+              placeholder="Type id ..."
             />
             <i-button type="submit" color="primary" class="_margin-left:1">
               Connect
@@ -64,6 +58,20 @@ const onSubmit = () => {
           </i-form-group>
         </i-form></i-column
       >
+      <i-form @submit="onSubmitMsg" size="md">
+        <i-form-group inline>
+          <i-form-label>MSG</i-form-label>
+          <i-input
+            name="msginput"
+            v-model="msginput"
+            placeholder="Type Msg ..."
+          />
+          <i-button type="submit" color="primary" class="_margin-left:1">
+            Send
+          </i-button>
+        </i-form-group>
+      </i-form>
+      <i-column xs="6"> </i-column>
     </i-row>
   </i-container>
 </template>

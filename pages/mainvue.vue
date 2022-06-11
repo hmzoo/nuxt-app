@@ -1,6 +1,7 @@
 <script setup>
 const followslist = useFollowsUKey();
 const infoukey = useInfoUKey ();
+const selectedfollow=useSelectedFollow();
 
 const setInfo = (t) => {
   setInfoUKey(t);
@@ -11,6 +12,10 @@ const addukey = (d) => {
 const delukey = (d) => {
   delFollowUKey(d);
   //delUKeyList(d);
+};
+const selectFollow = (d) => {
+  useSelectedFollow().value=(d)
+  console.log("selected ",d)
 };
 </script>
 
@@ -26,6 +31,7 @@ const delukey = (d) => {
             :ukey="item.ukey"
             :info="item.info"
             @onDelete="delukey"
+            @onSelect="selectFollow"
           />
         </div>
       </i-column>
@@ -39,7 +45,7 @@ const delukey = (d) => {
 
     <i-row center>
       <i-column xs="6">
-       {{ followslist}}
+       {{ selectedfollow}}
         <InfoInput @onSubmit="setInfo" :info="infoukey"  />
       </i-column>
     </i-row>

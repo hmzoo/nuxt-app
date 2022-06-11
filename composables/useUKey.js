@@ -24,6 +24,9 @@ export const useFollowersUKey = () => {
     return useState('followersukey', () => [])
 }
 
+export const useSelectedFollow = () => {
+    return useState('selectedfollow', () => "")
+}
 
 
 
@@ -48,7 +51,7 @@ const getLocalUKey = () => {
 //States
 
 const updateStates=(data)=> {
-    console.log(data)
+  //  console.log(data)
     if(!data){return}
     if (data.srvmsg!== undefined){
     useSrvMsg().value = data.srvmsg
@@ -58,7 +61,7 @@ const updateStates=(data)=> {
     }
     if(data.info !== undefined){
         useInfoUKey().value=data.info || ""
-        console.log(useInfoUKey().value)
+       // console.log(useInfoUKey().value)
     }
     if (data.follows !== undefined ){
         useFollowsUKey().value=data.follows
@@ -85,7 +88,7 @@ export const getApiUKey = () => {
     const date = Date.now()
     return $fetch(`/api/ukey?ukey=${ukey.value.ukey}&uid=${ukey.value.uid}&date=${date}`)
         .then(resp => {
-            console.log("RESP",resp)
+          //  console.log("RESP",resp)
             updateStates(resp);
             setLocalUKey();
             return resp;
@@ -102,7 +105,7 @@ const reqItemListUKey = (req)=> {
 
     return $fetch("/api/ukey", { method: 'POST', body: req })
         .then(resp => {
-            console.log("reqlist",req,resp,resp.srvmsg.err )
+         //   console.log("reqlist",req,resp,resp.srvmsg.err )
             updateStates(resp)
 
             return resp
@@ -132,7 +135,7 @@ export const renewIDUKey = () => {
 //LIST UTILS
 export const indexListUKey = (ukey) => {
     const list = useUKeyList().value
-    console.log(list)
+ //   console.log(list)
     for (var i = 0; i < list.length; i++) {
         if (list[i].ukey == ukey) {
             return i

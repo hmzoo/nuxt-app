@@ -1,5 +1,5 @@
 <script setup>
-const followerslist = useFollowersUKey();
+const pmsglist= usePeersMessages();
 </script>
 
 
@@ -16,10 +16,10 @@ const followerslist = useFollowersUKey();
   >
     <div
       style="margin: 3px"
-      v-for="(item, index) in followerslist"
+      v-for="(item, index) in pmsglist"
       :key="'follower_' + index"
     >
-      {{ item }}</div
+      {{ item.id }} : {{ item.msg}}</div
     >
   </div>
 </template>
