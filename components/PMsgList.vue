@@ -1,5 +1,9 @@
 <script setup>
 const pmsglist= usePeersMessages();
+
+const buildMsg = (pmsg) => {
+  return getFollowFromInfo(pmsg.id).ukey+" : "+pmsg.msg
+}
 </script>
 
 
@@ -19,7 +23,7 @@ const pmsglist= usePeersMessages();
       v-for="(item, index) in pmsglist"
       :key="'follower_' + index"
     >
-      {{ item.id }} : {{ item.msg}}</div
+      {{ buildMsg(item)}}</div
     >
   </div>
 </template>

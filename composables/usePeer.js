@@ -7,7 +7,6 @@ export const usePeers = () => {
 }
 
 export const usePeersMessages = () => {
-    console.log("SABLE",typeof $peer !== "undefined",typeof peer !== "undefined")
     return useState('peersmessages', () => {return []})
 }
 

@@ -64,6 +64,13 @@ const updateStates=(data)=> {
        // console.log(useInfoUKey().value)
     }
     if (data.follows !== undefined ){
+        for(let i=0;i<data.follows.length;i=i+1){
+            let v = getFollow(data.follows[i].ukey);
+            console.log(i,v,v.ukey)
+            data.follows[i].selected = ( v !=null && v.selected!=undefined && v.selected )
+            data.follows[i].connected = ( v !=null && v.connected!=undefined && v.connected)
+        }
+           
         useFollowsUKey().value=data.follows
     }
     if (data.followers!== undefined ){
@@ -78,7 +85,7 @@ export const resetUKey = () => {
     const ukey = useUKey()
     ukey.value = {ukey: "000000",uid: "xxx-xxx-xxx"}
     setLocalUKey();
-    getApiUKey();
+    
 }
 
 
@@ -113,6 +120,7 @@ const reqItemListUKey = (req)=> {
 }
 
 export const getAllDataUkey = () => {
+    console.log("GETALLDATA");
     const req =reqItemListUKey({cmd:"GET"})
 }
 
@@ -131,10 +139,30 @@ export const renewIDUKey = () => {
     reqItemListUKey({cmd:"RENEWID"})
 }
 
+export const selectFollowUkey = (lookat,b) => {
+    const follows = useFollowsUKey().value
+    for(let i=0;i<follows.length;i=i+1){
+        if( follows[i].ukey == lookat){
+            
+            follows[i].selected =b
+        }
+    }
+    useFollowsUKey().value =follows
+}
+
+export const setConnectedFollowUkey = (lookat,b) => {
+    const follows = useFollowsUKey().value
+    for(let i=0;i<follows.length;i=i+1){
+        if( follows[i].ukey == lookat){
+            follows[i].connected =b
+        }
+    }
+    useFollowsUKey().value =follows
+}
 
 //LIST UTILS
 export const indexListUKey = (ukey) => {
-    const list = useUKeyList().value
+    const list = useFollowsUKey().value
  //   console.log(list)
     for (var i = 0; i < list.length; i++) {
         if (list[i].ukey == ukey) {
@@ -142,6 +170,27 @@ export const indexListUKey = (ukey) => {
         }
     }
     return -1
+}
+
+export const getFollow = (ukey) => {
+    const list = useFollowsUKey().value
+    for (var i = 0; i < list.length; i++) {
+        console.log("l",list[i],list[i].ukey == ukey)
+        if (list[i].ukey == ukey) {
+            return list[i]
+        }
+    }
+    return {}
+}
+
+export const getFollowFromInfo = (info) => {
+    const list = useFollowsUKey().value
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].info == info) {
+            return list[i]
+        }
+    }
+    return {ukey:'UNKNOWN',info:info}
 }
 
 

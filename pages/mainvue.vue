@@ -10,12 +10,12 @@ const addukey = (d) => {
   addFollowUkey(d);
 };
 const delukey = (d) => {
-  delFollowUKey(d);
+  delFollowUKey(d.ukey);
   //delUKeyList(d);
 };
 const selectFollow = (d) => {
-  useSelectedFollow().value=(d)
-  console.log("selected ",d)
+  
+   selectFollowUkey(d.ukey,!d.selected) 
 };
 </script>
 
@@ -28,8 +28,7 @@ const selectFollow = (d) => {
             style="margin: 3px"
             v-for="(item, index) in followslist"
             :key="'ukey' + index"
-            :ukey="item.ukey"
-            :info="item.info"
+            :ukey="item"
             @onDelete="delukey"
             @onSelect="selectFollow"
           />

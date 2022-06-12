@@ -2,10 +2,11 @@
 const props = defineProps({
   showReset: { Type: Boolean, default: false },
 });
+const emit = defineEmits(["onReset"]);
 const ukey = useUKey();
 const newid= () => {
-  renewIDUKey();
-  //getApiUKey();
+  //renewIDUKey();
+  emit("onReset", ukey);
   }
 
 </script>
