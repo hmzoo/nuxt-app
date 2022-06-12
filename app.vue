@@ -1,5 +1,5 @@
 <script setup>
-const { $initPeer, $interfacePeer, $getConn, $connectPeer } = useNuxtApp();
+const { $initPeer, $interfacePeer, $getConn, $connectPeer ,$heartBeat} = useNuxtApp();
 useHead({
   titleTemplate: "My App - %s",
 
@@ -15,28 +15,34 @@ const startApp = () => {
   getApiUKey();
   if (typeof $interfacePeer !== "undefined") {
     $interfacePeer.onPeerOpen = (id) => {
+      console.log("ONPEEROPEN")
       setInfoUKey(id);
     };
     $interfacePeer.onPeerConn = (id) => {
-      checkFollowers();
+      console.log("ONPEERCONN")
+      updateApp();
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
       
     };
     $interfacePeer.onConnData = (id, data) => {
+      console.log("ONCONNDATA")
       if(data.msg !=undefined){
          addPeerMessage(id, data.msg);
       }
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
     };
     $interfacePeer.onConnOpen = (id) => {
+      console.log("ONCONNOPEN")
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
-      checkFollowers();
+      
   
     };
     $interfacePeer.onConnClose = (id) => {
+      console.log("ONCONNCLOSE")
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, false);
     };
     $interfacePeer.onConnError = (id, err) => {
+      console.log("ONCONNERROR")
       Console.log("Peer err", id, err.toString(), getFollowFromInfo(id));
     };
     usePeersMessages().value = [];
@@ -47,7 +53,8 @@ const startApp = () => {
 
 const updateApp = () => {
   getAllDataUkey();
-  setTimeout(checkConns, 1000);
+  setTimeout(checkFollowers, 1000);
+  setTimeout(checkConns, 2000);
 };
 
 const resetApp = () => {
@@ -66,11 +73,13 @@ const checkConns = () => {
 const addFollow = (d) => {
   console.log("rrr",d)
   addFollowUkey(d);
+  setTimeout(checkConns, 1000);
 };
 
 onMounted(() => {
   startApp();
   var updateinterval = setInterval(updateApp, 20000);
+  var hbinterval = setInterval($heartBeat, 3000);
 });
 /*
 const { data } = await useFetch('/api/ukey',{params: {ukey:numid.value.ukey,uid:numid.value.uid}, pick:['ukey','uid']})

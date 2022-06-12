@@ -23,6 +23,21 @@ const interf ={
 }
 
 
+const heartBeat= ()=>{
+
+  conns.forEach((c)=>{
+   
+    if(c.conn.open){
+      
+    c.conn.send({hb:"ok"});
+    }
+  })
+
+}
+
+
+
+
 const initConn = (conn) =>{
   interf.onPeerConn(conn.peer)
   conn.on("open", function () {
@@ -127,7 +142,8 @@ export default defineNuxtPlugin(() => {
       initPeer: initPeer,
       connectPeer: connectPeer,
       dataPeer: dataPeer,
-      getConn : getConn
+      getConn : getConn,
+      heartBeat:heartBeat
     }
   }
 })

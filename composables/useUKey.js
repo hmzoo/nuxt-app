@@ -121,7 +121,7 @@ const reqItemListUKey = (req)=> {
 }
 
 export const getAllDataUkey = () => {
-    checkFollowers()
+    
     console.log("GETALLDATA");
     const req =reqItemListUKey({cmd:"GET"})
 }
@@ -155,6 +155,7 @@ export const selectFollowUkey = (lookat,b) => {
 
 export const checkFollowers =()=>
 {
+    console.log("checkFollowers")
     useFollowersUKey().value.forEach((f)=>{
         if(indexFollowUKey(f)<0){
             addFollowUkey(f);
