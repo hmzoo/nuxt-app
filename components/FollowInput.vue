@@ -17,22 +17,24 @@ const onSubmit = () => {
 
 
 <template>
-  <i-form @submit="onSubmit" size="lg">
+  <i-form @submit="onSubmit" >
     <i-form-group inline>
-      <i-form-label>CALL</i-form-label>
+      <i-form-label>JOIN</i-form-label>
       <i-input
+      size="sm"
         name="num"
         v-model="number"
         placeholder="000000"
         class="_font-weight:bold _font-size:xl _font-family:monospace"
       />
       <i-button
+        size="sm"
         type="submit"
         :color="buttonColor(number)"
         class="_margin-left:1"
         :disabled="!validNum(number)"
       >
-        Submit
+        CALL
       </i-button>
     </i-form-group>
   </i-form>

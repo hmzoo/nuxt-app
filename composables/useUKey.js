@@ -82,6 +82,7 @@ const updateStates=(data)=> {
 // GET REQ
 
 export const resetUKey = () => {
+    deleteIDUKey()
     const ukey = useUKey()
     ukey.value = {ukey: "000000",uid: "xxx-xxx-xxx"}
     setLocalUKey();
@@ -120,6 +121,7 @@ const reqItemListUKey = (req)=> {
 }
 
 export const getAllDataUkey = () => {
+    checkFollowers()
     console.log("GETALLDATA");
     const req =reqItemListUKey({cmd:"GET"})
 }
@@ -135,8 +137,8 @@ export const setInfoUKey = (info) => {
     reqItemListUKey({cmd:"SETINFO",info:info})
 }
 
-export const renewIDUKey = () => {
-    reqItemListUKey({cmd:"RENEWID"})
+export const deleteIDUKey = () => {
+    reqItemListUKey({cmd:"DELETEID"})
 }
 
 export const selectFollowUkey = (lookat,b) => {
@@ -150,6 +152,15 @@ export const selectFollowUkey = (lookat,b) => {
     useFollowsUKey().value =follows
 }
 
+export const checkFollowers =()=>
+{
+    useFollowersUKey().value.forEach((f)=>{
+        if(indexFollowUKey(f)<0){
+            addFollowUkey(f);
+        }
+    })
+}
+
 export const setConnectedFollowUkey = (lookat,b) => {
     const follows = useFollowsUKey().value
     for(let i=0;i<follows.length;i=i+1){
@@ -161,7 +172,7 @@ export const setConnectedFollowUkey = (lookat,b) => {
 }
 
 //LIST UTILS
-export const indexListUKey = (ukey) => {
+export const indexFollowUKey = (ukey) => {
     const list = useFollowsUKey().value
  //   console.log(list)
     for (var i = 0; i < list.length; i++) {

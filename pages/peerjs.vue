@@ -27,7 +27,7 @@ const onSubmitMsg = () => {
   if (typeof $dataPeer !== "undefined") {
     useFollowsUKey().value.forEach((f) => {
       if (f.selected) {
-        $dataPeer(f.info, msginput.value);
+        $dataPeer(f.info, {msg:msginput.value});
       }
     });
   }
@@ -43,39 +43,17 @@ const onSubmitCxn = () => {
 
 <template>
   <i-container>
-    <i-row>
-      <i-column>peerjs {{ infoukey }} to {{ selectedinfo }}</i-column>
-    </i-row>
+
     <i-row>
       <i-column xs="4"><FollowsList @onSelect="selectFollow" /></i-column>
       <i-column xs="4"><PMsgList /></i-column>
-      <i-column xs="4">{{ follows }}</i-column>
+      <i-column xs="4"></i-column>
     </i-row>
     <i-row>
       <i-column xs="4"
-        ><i-button
-          type="submit"
-          color="primary"
-          class="_margin-left:1"
-          @click="checkConns"
-          >CHECK</i-button
         ></i-column
       >
-      <i-column xs="4">
-        <i-form @submit="onSubmitCxn" size="md">
-          <i-form-group inline>
-            <i-form-label>CXN</i-form-label>
-            <i-input
-              name="cxninput"
-              v-model="cxninput"
-              placeholder="Type id ..."
-            />
-            <i-button type="submit" color="primary" class="_margin-left:1">
-              Connect
-            </i-button>
-          </i-form-group>
-        </i-form></i-column
-      ><i-column xs="4">
+<i-column xs="4">
         <i-form @submit="onSubmitMsg" size="md">
           <i-form-group inline>
             <i-form-label>MSG</i-form-label>
@@ -90,6 +68,9 @@ const onSubmitCxn = () => {
           </i-form-group>
         </i-form>
       </i-column>
+            <i-column xs="4">
+       </i-column
+      >
     </i-row>
   </i-container>
 </template>

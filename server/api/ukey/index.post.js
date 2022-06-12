@@ -1,4 +1,4 @@
-import { isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow, setInfo, delUKey,newUKey, Reply } from './ukey';
+import { isFreeUKey, checkParamsAndValidUKey, buildData, addFollow, delFollow, setInfo, delUKey, newUKey, Reply } from './ukey';
 
 /*****************************************************************************************
 
@@ -39,8 +39,8 @@ const switchCmd = (req) => {
       if (req.cmd == "SETINFO" && req.info != null) {
             return apiSetInfo(req.ukey, req.info)
       }
-      if (req.cmd == "RENEWID") {
-            return apiRenewID(req.ukey)
+      if (req.cmd == "DELETEID") {
+            return apiDeleteID(req.ukey)
       }
       return Reply("REQUEST FAILED !!", "BAD REQUEST");
 
@@ -87,16 +87,12 @@ const apiSetInfo = (ukey, info) => {
 }
 
 // Renouvellement d ID
-const apiRenewID = (ukey) => {
+const apiDeleteID = (ukey) => {
       return delUKey(ukey)
             .then((done) => {
-                  return newUKey().then(resp => {
-                        let reply = Reply("New ID " + resp.ukey)
-                        reply.ukey = resp.ukey
-                        reply.uid = resp.uid
-                        return reply
-                  }).catch(err => Reply("GET NEW ID FAILED !", err.toString()))
-            })
+                  return Reply("ID " + ukey + " DELETED", null)
+            }).catch(err => Reply("GET NEW ID FAILED !", err.toString()))
+
 }
 
 
