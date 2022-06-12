@@ -20,7 +20,7 @@ const startApp = () => {
     $interfacePeer.onPeerConn = (id) => {
       checkFollowers();
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
-      setTimeout(updateApp, 1000);
+      
     };
     $interfacePeer.onConnData = (id, data) => {
       if(data.msg !=undefined){
@@ -31,11 +31,10 @@ const startApp = () => {
     $interfacePeer.onConnOpen = (id) => {
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
       checkFollowers();
-      setTimeout(updateApp, 1000);
+  
     };
     $interfacePeer.onConnClose = (id) => {
       setConnectedFollowUkey(getFollowFromInfo(id).ukey, false);
-      setTimeout(updateApp, 1000);
     };
     $interfacePeer.onConnError = (id, err) => {
       Console.log("Peer err", id, err.toString(), getFollowFromInfo(id));
@@ -65,6 +64,7 @@ const checkConns = () => {
 };
 
 const addFollow = (d) => {
+  console.log("rrr",d)
   addFollowUkey(d);
 };
 

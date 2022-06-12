@@ -127,6 +127,7 @@ export const getAllDataUkey = () => {
 }
 
 export const addFollowUkey = (lookat) => {
+    console.log("add ",lookat)
     reqItemListUKey({cmd:"ADD",lookat:lookat})
 }
 
