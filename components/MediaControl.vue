@@ -1,72 +1,73 @@
 <script setup>
+const emit = defineEmits(["onStreamOn","onStreamOff"]);
 
-const camera_status =ref(false)
-const micro_status =ref(false)
-const videoPlayerSelf= ref(null)
+const camera_status = ref(false);
+const micro_status = ref(false);
 
-var mediastream = null
 
-const switchCam =()=>{
-    camera_status.value=!camera_status.value
-    getMedia()
+const switchCam = () => {
+  camera_status.value = !camera_status.value;
+  getMedia();
+};
+const switchMic = () => {
+  micro_status.value = !micro_status.value;
+  getMedia();
+};
 
-    
-}
-const switchMic =()=>{
-    micro_status.value=!micro_status.value
-    getMedia()
-}
 
-const setTracks=()=>{
-    if(window.selfStream==null){getMedia()}else{
-        if(window.selfStream.getAudioTracks()[0]){
-            window.selfStream.getAudioTracks()[0].enabled = micro_status.value
+
+const getMedia = () => {
+  let constrains = {
+    video: true,
+    audio: true,
+  };
+  console.log(
+    constrains,
+    camera_status.value,
+    micro_status.value,
+    window.selfStream
+  );
+  console.log("navigator.mediaDevices.", navigator.mediaDevices);
+
+  if (window.selfStream == undefined) {
+    navigator.mediaDevices
+      .getUserMedia(constrains)
+      .then((stream) => {
+        stream.getAudioTracks()[0].enabled = micro_status.value;
+        stream.getVideoTracks()[0].enabled = camera_status.value;
+
+        if (!(camera_status.value || micro_status.value)) {
+          stream.getTracks().forEach((track) => track.stop());
         }
-       if(window.selfStream.getVideoTracks()[0]){
-            window.selfStream.getVideoTracks()[0].enabled = camera_status.value
-       }
 
-     
-        
-        console.log("TRACKS",window.selfStream.getVideoTracks(),window.selfStream.getAudioTracks())
-        videoPlayerSelf.value.srcObject=window.selfStream;
-        
-        //videoPlayerSelf.video,paused=false;
-        console.log(videoPlayerSelf)
+        stream.onremovetrack = function () {
+          console.log("Stream ended");
+        };
+
+        window.selfStream = stream;
+        emit("onStreamOn");
+        // setTracks()
+      })
+      .catch((err) => console.log(err.toString()));
+  } else {
+    window.selfStream.getAudioTracks()[0].enabled = micro_status.value;
+    window.selfStream.getVideoTracks()[0].enabled = camera_status.value;
+    if (!(camera_status.value || micro_status.value)) {
+      window.selfStream.getTracks().forEach((track) => track.stop());
+      emit("onStreamOff");
+      delete window.selfStream;
     }
-}
-
-
-const getMedia =()=>{
-    let constrains = {
-     video: camera_status.value,
-     audio: micro_status.value
-     }
-    console.log(constrains)
-    console.log("navigator.mediaDevices.",navigator.mediaDevices)
-    navigator.mediaDevices.getUserMedia(constrains).then(stream =>{
-     window.selfStream = stream;
- 
-     stream.onremovetrack = function() {
-        console.log('Stream ended');
-     }
-    setTracks()
-    
-  }).catch(err => console.log(err.toString()));
-}
-
-
+  }
+};
 </script>
 
 <template>
-<i-container>
-    <video autoplay width="320" height="240" ref="videoPlayerSelf"></video>
+  <i-container>
     <div>
- <i-button @click="switchCam" v-if="camera_status">Camera on</i-button>
- <i-button @click="switchCam" v-else>Camera off</i-button> 
- <i-button @click="switchMic" v-if="micro_status">Micro on</i-button>
- <i-button @click="switchMic" v-else>micro off</i-button> 
- </div>
- 
- </i-container>
+      <i-button @click="switchCam" v-if="camera_status">Camera off</i-button>
+      <i-button @click="switchCam" v-else>Camera on</i-button>
+      <i-button @click="switchMic" v-if="micro_status">Micro off</i-button>
+      <i-button @click="switchMic" v-else>micro on</i-button>
+    </div>
+  </i-container>
 </template>
