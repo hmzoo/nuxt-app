@@ -24,12 +24,9 @@ const interf ={
 
 
 const heartBeat= ()=>{
-
   conns.forEach((c)=>{
-   
-    if(c.conn.open){
-      
-    c.conn.send({hb:"ok"});
+    if(c.conn.open){  
+    c.conn.send({hb:"cool"});
     }
   })
 
@@ -58,12 +55,14 @@ const initConn = (conn) =>{
 
 const initMedia = (media) =>{
   interf.onPeerCall(media.peer)
-  media.on("open", function () {
-     addMedia(media.peer,media)
-     interf.onConnOpen(media.peer)
+  media.on("stream", function (stream) {
+    interf.onMediaStream(media.peer,stream)
   });
-  media.on("data", function (data) {
-    interf.onMediaData(media.peer,data)
+  media.on("close", function () {
+    interf.onMediaClose(media.peer)
+  });
+  media.on("error", function (err) {
+    interf.onConnError(media.peer,err)
   });
 }
 
