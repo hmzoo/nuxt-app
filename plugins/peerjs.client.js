@@ -45,7 +45,7 @@ const initConn = (conn) =>{
     interf.onConnData(conn.peer,data)
   });
   conn.on("close", function () {
-    delConn(conn.peer,conn)
+    delConn(conn.peer)
     interf.onConnClose(conn.peer)
   });
   conn.on("error", function (err) {
@@ -56,13 +56,15 @@ const initConn = (conn) =>{
 const initMedia = (media) =>{
   interf.onPeerCall(media.peer)
   media.on("stream", function (stream) {
+    addMedia(media.peer,stream)
     interf.onMediaStream(media.peer,stream)
   });
   media.on("close", function () {
+    delMedia(media.peer)
     interf.onMediaClose(media.peer)
   });
   media.on("error", function (err) {
-    interf.onConnError(media.peer,err)
+    interf.onMediaError(media.peer,err)
   });
 }
 
@@ -90,6 +92,7 @@ const dataPeer =(id,data) =>{
   }
 }
 
+const callPeer= (id,stream)=> initMedia(peer.call(id,stream));
 
 
 
@@ -118,7 +121,7 @@ const getConn = (id) => {
   return null
 }
 
-const addmedia = (id, media) => {
+const addMedia = (id, media) => {
   medias.push({ id: id, media: media })
 }
 
@@ -141,6 +144,7 @@ export default defineNuxtPlugin(() => {
       initPeer: initPeer,
       connectPeer: connectPeer,
       dataPeer: dataPeer,
+      callPeer: callPeer,
       getConn : getConn,
       heartBeat:heartBeat
     }
