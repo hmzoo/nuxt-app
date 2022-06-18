@@ -69,6 +69,29 @@ const updateStates=(data)=> {
             console.log(i,v,v.ukey)
             data.follows[i].selected = ( v !=null && v.selected!=undefined && v.selected )
             data.follows[i].connected = ( v !=null && v.connected!=undefined && v.connected)
+            if(v.conn!=undefined){
+                data.follows[i].conn=v.conn
+            }
+            if(v.connStatus!=undefined){
+                data.follows[i].connStatus=v.connStatus
+            }else{
+                data.follows[i].connStatus=false
+            }
+            if(v.connInfo!=undefined ){
+                data.follows[i].connInfo=v.connInfo
+            }else{
+                data.follows[i].connInfo=""
+            }
+            if(v.mediaStatus!=undefined){
+                data.follows[i].mediaStatus=v.mediaStatus
+            }else{
+                data.follows[i].mediaStatus=false
+            }
+            if(v.mediaInfo!=undefined ){
+                data.follows[i].mediaInfo=v.mediaInfo
+            }else{
+                data.follows[i].mediaInfo=""
+            }
         }
            
         useFollowsUKey().value=data.follows
@@ -168,6 +191,28 @@ export const setConnectedFollowUkey = (lookat,b) => {
     for(let i=0;i<follows.length;i=i+1){
         if( follows[i].ukey == lookat){
             follows[i].connected =b
+        }
+    }
+    useFollowsUKey().value =follows
+}
+
+export const setConnFollow = (conn,conninfo) => {
+    const follows = useFollowsUKey().value
+    for(let i=0;i<follows.length;i=i+1){
+        if( follows[i].info == conn.peer){
+            follows[i].connStatus =conn.open
+            follows[i].connInfo =conninfo
+        }
+    }
+    useFollowsUKey().value =follows
+}
+
+export const setMediaFollow = (media,mediaInfo) => {
+    const follows = useFollowsUKey().value
+    for(let i=0;i<follows.length;i=i+1){
+        if( follows[i].info == media.peer){
+            follows[i].mediaStatus =media.open
+            follows[i].mediaInfo =mediaInfo
         }
     }
     useFollowsUKey().value =follows

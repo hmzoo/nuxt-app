@@ -1,12 +1,10 @@
 <script setup>
-const { $connectPeer, $dataPeer, $getConn } = useNuxtApp();
-const cxninput = ref("");
-const msginput = ref("");
-const selectedinfo = ref("");
+const { $connectPeer, $dataPeer, $getConn,$callPeer } = useNuxtApp();
 
-const infoukey = useInfoUKey();
-const selectedfollow = useSelectedFollow();
+const msginput = ref("");
 const follows = useFollowsUKey();
+const ups =usePeersStreams();
+const uss = useSelfStream();
 
 const selectFollow = (f) => {
   selectFollowUkey(f.ukey, !f.selected);
@@ -34,43 +32,31 @@ const onSubmitMsg = () => {
 };
 
 
-const onSubmitCxn = () => {
-  console.log("ok submit", cxninput.value);
-  if (typeof $connectPeer !== "undefined") {
-    $connectPeer(cxninput.value);
-  }
-};
 
-const selfStreamVideo = ref(null)
-const stream =ref(null)
-const info =ref("yes")
+
+
 const onStreamOn = () => {
-  info.value="OKETO"
-  stream.value=window.selfStream;
-  selfStreamVideo.value.srcObject = window.selfStream;
-  console.log("stream on",selfStreamVideo)
+    follows.value.forEach((f) => {
+      $callPeer(f.info,uss.value);
+  });
+  
+  //selfStreamVideo.value.srcObject = window.selfStream;
+  console.log("stream on",uss.value)
 };
 
 const onStreamOff = () => {
-
-  selfStreamVideo.value.srcObject = null;
-    console.log("stream on",selfStreamVideo)
+  
+  //selfStreamVideo.value.srcObject = null;
+    console.log("stream off",uss.value)
 };
 </script>
 
 <template>
   <i-container>
     <i-row>
-      <i-column xs="4"><FollowsList @onSelect="selectFollow" /></i-column>
+      <i-column xs="4"><FollowsList @onSelect="selectFollow" /><MediasList /></i-column>
       <i-column xs="4"><PMsgList /></i-column>
-      <i-column xs="4">    <MediaVideo :stream="stream" muted="true" />    <video
-          ref="selfStreamVideo"
-          width="300"
-          height="300"
-          autoplay="autoplay"
-          muted="true"
-
-        ></video>
+      <i-column xs="4">    <MediaVideo :stream="uss" muted="true" /> 
         <MediaControl @onStreamOn="onStreamOn" @onStreamOff="onStreamOff" /></i-column>
     </i-row>
     <i-row>

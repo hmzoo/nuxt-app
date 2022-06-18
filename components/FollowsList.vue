@@ -11,11 +11,12 @@ const select= (ukey)=>{
 
 const BuildButton =(ukey)=>{
   let text = ukey.ukey+" "
-  if(ukey.connected){
+  if(ukey.connStatus){
     text=text+"connected"
   }else{
     text=text+"disconnected"
   }
+  text=text+" "+ukey.connInfo
   return text
 }
 

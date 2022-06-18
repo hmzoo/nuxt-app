@@ -1,5 +1,5 @@
 <script setup>
-const { $initPeer, $interfacePeer, $getConn, $connectPeer ,$heartBeat} = useNuxtApp();
+const { $initPeer, $interfacePeer, $getConn, $connectPeer ,$heartBeat,$callPeer} = useNuxtApp();
 useHead({
   titleTemplate: "My App - %s",
 
@@ -11,6 +11,8 @@ useHead({
   },
 });
 
+const uss = useSelfStream();
+
 const startApp = () => {
   getApiUKey();
   if (typeof $interfacePeer !== "undefined") {
@@ -18,33 +20,67 @@ const startApp = () => {
       console.log("ONPEEROPEN")
       setInfoUKey(id);
     };
-    $interfacePeer.onPeerConn = (id) => {
-      console.log("ONPEERCONN")
+    $interfacePeer.onPeerConn = (conn) => {
+      console.log("ONPEERCONN",conn.peer)
       updateApp();
-      setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
+      setConnFollow(conn,"CONNECTION");
       
     };
-    $interfacePeer.onConnData = (id, data) => {
+    
+    $interfacePeer.onConnData = (conn, data) => {
       console.log("ONCONNDATA")
       if(data.msg !=undefined){
-         addPeerMessage(id, data.msg);
+         addPeerMessage(conn.peer, data.msg);
+         setConnFollow(conn,"MSG");
+      }else{
+       setConnFollow(conn,"");
       }
-      setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
-    };
-    $interfacePeer.onConnOpen = (id) => {
-      console.log("ONCONNOPEN")
-      setConnectedFollowUkey(getFollowFromInfo(id).ukey, true);
       
-  
     };
-    $interfacePeer.onConnClose = (id) => {
+    $interfacePeer.onConnOpen = (conn) => {
+      console.log("ONCONNOPEN",conn.peer)
+      setConnFollow(conn,"OPEN");
+      if(uss.value!=null){
+      $callPeer(conn.peer,uss.value)
+      }else{
+      $callPeer(conn.peer)
+      }
+    };
+    $interfacePeer.onConnClose = (conn) => {
       console.log("ONCONNCLOSE")
-      setConnectedFollowUkey(getFollowFromInfo(id).ukey, false);
+      setConnectedFollowUkey(getFollowFromInfo(conn.peer).ukey, false);
+      setConnFollow(conn,"CLOSE");
     };
     $interfacePeer.onConnError = (id, err) => {
       console.log("ONCONNERROR")
-      Console.log("Peer err", id, err.toString(), getFollowFromInfo(id));
+      Console.log("Peer connection err", id, err.toString(), getFollowFromInfo(id));
+      setConnFollow(conn,"ERROR");
     };
+
+   $interfacePeer.onPeerCall = (media) => {
+      console.log("ONPEERCALL",media.peer)
+      setMediaFollow(media,"CALL");
+      media.answer(uss.value)
+    };
+
+
+     $interfacePeer.onMediaStream = (media, stream) => {
+      console.log("ONMEDIASTREAM")
+      setMediaFollow(media,"STREAM");
+      setPeerStream(media.peer,stream)
+    };
+    $interfacePeer.onMediaClose = (media) => {
+      console.log("ONMEDIACLOSE")
+      setMediaFollow(media,"CLOSE");
+      delPeerStream(media.peer)
+      //setConnectedFollowUkey(getFollowFromInfo(id).ukey, false);
+    };
+    $interfacePeer.onMediaError = (media, err) => {
+      console.log("ONMEDIAERROR")
+      Console.log("Peer media err", media.peer, err.toString());
+       setMediaFollow(media,"ERROR");
+    };
+
     usePeersMessages().value = [];
     $initPeer();
     setTimeout(updateApp, 1000);
