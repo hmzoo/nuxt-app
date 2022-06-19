@@ -34,14 +34,14 @@ const selectMic = (id) => {
   closeSelfStream("CHANGE MIC")
   selectAudioDevice(id);
   switchMic()
-  setTimeout(getMedias, 1000);
+  
 };
 const selectCam = (id) => {
   console.log("selectdevice",id,getConstrains())
   closeSelfStream("CHANGE CAM")
   selectVideoDevice(id);
   switchCam();
-  setTimeout(getMedias, 1000);
+  
 };
 
 const getDevices = () => {

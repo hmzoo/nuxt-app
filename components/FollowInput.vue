@@ -17,9 +17,13 @@ const onSubmit = () => {
 
 
 <template>
-  <i-form @submit="onSubmit" >
-    <i-form-group inline>
-      <i-form-label>JOIN</i-form-label>
+
+  <i-container>
+    <i-row>
+    <i-column xs="3"><span class="bigintitule" >JOIN:</span></i-column>
+    <i-column xs="9">
+<i-form @submit="onSubmit" >
+     <i-form-group inline>
       <i-input
       size="sm"
         name="num"
@@ -34,8 +38,14 @@ const onSubmit = () => {
         class="_margin-left:1"
         :disabled="!validNum(number)"
       >
-        CALL
+        CALL 
       </i-button>
     </i-form-group>
-  </i-form>
+    </i-form>
+    </i-column>
+
+ 
+      </i-row>
+  </i-container>
+ 
 </template>

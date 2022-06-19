@@ -69,9 +69,8 @@ export const bConfStreamStop=(text)=>{
     if (useSelfStream().value!= null) {
         console.log("remove stream")
         useSelfStream().value.getTracks().forEach((track) => track.stop());
-        useSelfStream().value=null
       }
-    
+      useSelfStream().value = null
     useBrowserConf().value={
         micro_status : false,
         camera_status : false,

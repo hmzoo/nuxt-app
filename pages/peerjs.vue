@@ -58,7 +58,7 @@ const onStreamOff = () => {
     <i-row>
       <i-column xs="4"><FollowsList @onSelect="selectFollow" /><MediasList /></i-column>
       <i-column xs="4"><PMsgList /></i-column>
-      <i-column xs="4">    <MediaVideo :stream="uss" muted="true" /> 
+      <i-column xs="4">    <MediaVideoSelf  /> 
         <MediaControl @onStreamOn="onStreamOn" @onStreamOff="onStreamOff" /></i-column>
     </i-row>
     <i-row>
