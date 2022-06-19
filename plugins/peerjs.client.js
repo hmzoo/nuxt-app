@@ -2,9 +2,11 @@ import Peer from 'peerjs'
 
 //const peer = new Peer(null, { debug: 3 })
 
-let peer = new Peer()
+let peer = null
 let conns = {}
 let medias = {}
+let ssid =""
+
 
 const interf ={
   onPeerOpen : (id) => console.log("ONPEEROPEN",id),
@@ -20,20 +22,43 @@ const interf ={
   onMediaStream : (media,stream) => console.log("ONMEDIASTREAM", media.peer),
   onMediaClose : (media) => console.log("ONMEDIACLOSE", media.peer),
   onMediaError : (stream,err) => console.log("ONMEDIAERR",stream.peer,err.toString()),
+  onStreamInactive :(id) => console.log("ONSTREAMINACTIVE", id),
+  onStreamActive :(id) => console.log("ONSTREAMACTIVE", id),
+}
 
+const cleanPeer=()=>{
+  console.log("PLUGIN PEERJS CLEAN")
+  Object.keys(conns).forEach(key => {
+    if(conns[key].open){  
+      conns[key].close()
+    }
+  })
+  conns = {}
+  Object.keys(medias).forEach(key => {
+    if(medias[key].open){  
+      medias[key].close()
+    }
+  })
+  medias = {}
+  if(peer !=null){
+    peer.destroy()
+  }
+  
 }
 
 
 const heartBeat= ()=>{
   Object.keys(conns).forEach(key => {
-    if(conns[key].open){  
-      conns[key].send({hb:"cool"});
+    if(conns[key].open){ 
+      let sr="gotyou"
+      if(medias[key]== undefined){sr="callme"} 
+      conns[key].send({hb:"cool",sr:sr,ssid:ssid});
     }
   })
 }
 
-
 const initConn = (conn) =>{
+  console.log("PLUGIN PEERJS INITCONNECT",conn.peer)
   interf.onPeerConn(conn)
   conn.on("open", function () {
      setConn(conn.peer,conn)
@@ -46,38 +71,44 @@ const initConn = (conn) =>{
   conn.on("close", function () {
     delConn(conn.peer)
     interf.onConnClose(conn)
+    closeMedia(conn.peer)
   });
   conn.on("error", function (err) {
-    interf.onConnError(conn.peer,err)
+    interf.onConnError(conn,err)
+    conn.close()
+    delConn(conn.peer)
   });
 }
 
 const initMedia = (media) =>{
-  console.log("INITMEDIA",media)
+  console.log("PLUGIN PEERJS INITMEDIA",media.peer)
+  setMedia(media.peer,media)
   interf.onPeerCall(media)
   media.on("stream", function (stream) {
-    //addMedia(media.peer,media)
+    stream.onactive= ()=>{
+      interf.onStreamActive(media.peer)
+    }
+    stream.oninactive= ()=>{
+      interf.onStreamInactive(media.peer)
+    }
     interf.onMediaStream(media,stream)
   });
-  media.on("close", function (media) {
-    delMedia(media.peer)
+  media.on("close", function () {
     interf.onMediaClose(media)
+    delMedia(media.peer)
   });
   media.on("error", function (err) {
     interf.onMediaError(media,err)
+    media.close();
+    delMedia(media.peer)
   });
 }
 
 const initPeer= ()=>{
-  peer.destroy();
-  conns = {}
-  medias = []
-  console.log("INIT PEER")
   peer = new Peer()
-  
   peer.on("open", interf.onPeerOpen);
   peer.on("connection", initConn);
-  peer.on("call", initMedia);
+  peer.on("call", (initMedia));
   peer.on("close", interf.onPeerClose);
   peer.on("disconnected", interf.onPeerDisconnected);
   peer.on("error", interf.onPeerError);
@@ -94,14 +125,30 @@ const dataPeer =(id,data) =>{
 }
 
 const callPeer= (id,stream)=> {
-  console.log("CALLPEER",id,stream) 
-  let c= null
+ 
   if(stream != null){
-  c= peer.call(id,stream);
-  }else{
-  c=peer.call(id);
+  peer.call(id,stream);
+  console.log("PLUGIN PEERJS CALLPEER",id,stream)
   }
-  console.log("callPeer",id,stream,c)
+  
+}
+
+const closeMedia=(id)=>{
+  var media = getMedia(id)
+  if( media != null){
+    media.close();
+    delMedia(id)
+  }
+
+}
+
+const closeAllMedias=()=>{
+  Object.keys(medias).forEach(key => {
+    if(medias[key].open){  
+      medias[key].close()
+    }
+  })
+  medias=[]
 }
 
 
@@ -121,8 +168,8 @@ const getConn = (id) => {
   return null
 }
 
-const addMedia = (id, media) => {
-  medias[i]=media
+const setMedia = (id, media) => {
+  medias[id]=media
 }
 
 const delMedia = (id) => {
@@ -136,6 +183,10 @@ const getMedia = (id) => {
   return null
 }
 
+const setssid =(id)=>{
+  ssid=id
+}
+
 
 
 
@@ -143,12 +194,16 @@ export default defineNuxtPlugin(() => {
   return {
     provide: {
       interfacePeer : interf,
+      cleanPeer: cleanPeer,
       initPeer: initPeer,
       connectPeer: connectPeer,
       dataPeer: dataPeer,
       callPeer: callPeer,
       getConn : getConn,
-      heartBeat:heartBeat
+      getMedia : getMedia,
+      closeMedia : closeMedia,
+      heartBeat:heartBeat,
+      setssid :setssid
     }
   }
 })

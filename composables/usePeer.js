@@ -1,8 +1,12 @@
 // 
 
 
-export const usePeers = () => {
-    return useState('peers', () => {return []})
+export const usePeerStatus = () => {
+    return useState('peerstatus', () => {return "PEER NOT READY"})
+}
+
+export const peerStatus =(t)=>{
+    usePeerStatus().value=(t)
 }
 
 export const usePeersMessages = () => {
@@ -18,10 +22,18 @@ export const addPeerMessage = (id,msg) => {
 }
 
 export const setPeerStream = (id,stream) => {
+    if(stream == null){
+        delPeerStream(id)
+        return
+    }
+    stream.onactive = ()=> setPeerStream(id,stream)
+    
+    stream.oninactive = ()=> setPeerStream(id,stream)
+    
     const ps=usePeersStreams().value
     for(let i=0;i<ps.length;i=i+1){
         if(ps[i].id==id){
-            ps[id]={id:id,stream:stream}
+            ps[id]={id:id,stream:stream, active:stream.active}
             return
         }
     }
@@ -38,6 +50,18 @@ export const delPeerStream = (id) => {
         }
         usePeersStreams().value = nps
     }
+
+export const checkssid=(mediaid,streamid)=>{
+
+    const ps=usePeersStreams().value
+    for(let i=0;i<ps.length;i=i+1){
+        if(ps[i].id==mediaid && ps[i].stream.id==streamid){
+            return true
+        }
+    }
+    return false
+
+}
 
 
 

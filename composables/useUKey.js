@@ -66,7 +66,7 @@ const updateStates=(data)=> {
     if (data.follows !== undefined ){
         for(let i=0;i<data.follows.length;i=i+1){
             let v = getFollow(data.follows[i].ukey);
-            console.log(i,v,v.ukey)
+           
             data.follows[i].selected = ( v !=null && v.selected!=undefined && v.selected )
             data.follows[i].connected = ( v !=null && v.connected!=undefined && v.connected)
             if(v.conn!=undefined){
@@ -114,6 +114,7 @@ export const resetUKey = () => {
 
 
 export const getApiUKey = () => {
+    logit("UKEY","GETAPIUKEY")
     const ukey = useUKey()
     getLocalUKey();
     const date = Date.now()
@@ -145,11 +146,12 @@ const reqItemListUKey = (req)=> {
 
 export const getAllDataUkey = () => {
     
-    console.log("GETALLDATA");
+    
     const req =reqItemListUKey({cmd:"GET"})
 }
 
 export const addFollowUkey = (lookat) => {
+    logit("UKEY","ADDFOLLOW "+lookat)
     console.log("add ",lookat)
     reqItemListUKey({cmd:"ADD",lookat:lookat})
 }
@@ -158,6 +160,7 @@ export const delFollowUKey = (lookat) => {
     reqItemListUKey({cmd:"DEL",lookat:lookat})
 }
 export const setInfoUKey = (info) => {
+    logit("UKEY","SETINFO "+info)
     reqItemListUKey({cmd:"SETINFO",info:info})
 }
 
@@ -178,7 +181,7 @@ export const selectFollowUkey = (lookat,b) => {
 
 export const checkFollowers =()=>
 {
-    console.log("checkFollowers")
+    logit("UKEY","CHECKFOLLOWERS")
     useFollowersUKey().value.forEach((f)=>{
         if(indexFollowUKey(f)<0){
             addFollowUkey(f);
@@ -233,7 +236,6 @@ export const indexFollowUKey = (ukey) => {
 export const getFollow = (ukey) => {
     const list = useFollowsUKey().value
     for (var i = 0; i < list.length; i++) {
-        console.log("l",list[i],list[i].ukey == ukey)
         if (list[i].ukey == ukey) {
             return list[i]
         }

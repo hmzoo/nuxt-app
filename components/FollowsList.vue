@@ -17,6 +17,13 @@ const BuildButton =(ukey)=>{
     text=text+"disconnected"
   }
   text=text+" "+ukey.connInfo
+
+  if(ukey.mediaStatus){
+    text=text+" streaming"
+  }else{
+    text=text+" no stream"
+  }
+  text=text+" "+ukey.mediaInfo
   return text
 }
 

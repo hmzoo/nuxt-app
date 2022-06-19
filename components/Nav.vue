@@ -6,5 +6,6 @@
     <i-nav-item :to="{ name: 'peerjs' }">PeerJs</i-nav-item>
     <i-nav-item :to="{ name: 'camera' }">Camera</i-nav-item>
     <i-nav-item :to="{ name: 'about' }">About page</i-nav-item>
+    <i-nav-item :to="{ name: 'logs' }">LOGS</i-nav-item>
 </i-nav>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-const { $connectPeer, $dataPeer, $getConn,$callPeer } = useNuxtApp();
+const { $connectPeer, $dataPeer, $getConn,$callPeer,$closeAllMedias,$setssid} = useNuxtApp();
 
 const msginput = ref("");
 const follows = useFollowsUKey();
@@ -36,6 +36,7 @@ const onSubmitMsg = () => {
 
 
 const onStreamOn = () => {
+  $setssid(uss.value.id)
     follows.value.forEach((f) => {
       $callPeer(f.info,uss.value);
   });
@@ -45,7 +46,8 @@ const onStreamOn = () => {
 };
 
 const onStreamOff = () => {
-  
+    $setssid("")
+
   //selfStreamVideo.value.srcObject = null;
     console.log("stream off",uss.value)
 };

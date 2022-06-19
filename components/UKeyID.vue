@@ -1,29 +1,38 @@
 <script setup>
 const props = defineProps({
   showReset: { Type: Boolean, default: false },
+  peerStatus: { Type: String },
 });
 const emit = defineEmits(["onReset"]);
+
 const ukey = useUKey();
-const newid= () => {
+const ps = usePeerStatus();
+
+const newid = () => {
   //renewIDUKey();
   emit("onReset", ukey);
-  }
-
+};
 </script>
 
 
 <template>
   <i-container>
     <i-row>
-      <i-column xs="4"><small>Your ID :</small>  </i-column>
-      <i-column xs="6"> <span class="ukeynum">{{ ukey.ukey }}</span></i-column>
+      <i-column xs="4"><small>Your ID :</small> </i-column>
+      <i-column xs="6">
+        <span class="ukeynum">{{ ukey.ukey }}</span></i-column
+      >
       <i-column xs="2">
-       <i-button class="smallbtn" @click="newid" v-if="showReset" >New ID</i-button>
+        <i-button class="smallbtn" @click="newid" v-if="showReset"
+          >New ID</i-button
+        >
       </i-column>
     </i-row>
     <i-row>
-      <i-column xs="10">
-        <span class="ukeyinfo">{{ ukey.msg || "" }}</span>
+      <i-column xs="6">
+        <span class="ukeyinfo">{{ ukey.msg || "" }}</span> </i-column
+      ><i-column xs="6">
+        <span class="ukeyinfo">{{ ps }}</span>
       </i-column>
     </i-row>
   </i-container>
@@ -33,18 +42,18 @@ const newid= () => {
 //@import "@inkline/inkline/css/variables";
 //@import "@inkline/inkline/css/mixins";
 .ukeynum {
-    font-size: 24px;
-    font-weight: bold;
-    margin-left:10px;
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 10px;
 }
 
 .ukeyinfo {
-    font-size: 10px;
+  font-size: 10px;
 }
 
 .smallbtn {
   background-color: #72f7b5;
-  padding:2px;
+  padding: 2px;
   font-size: 10px;
- }
+}
 </style>
