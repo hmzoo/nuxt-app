@@ -26,7 +26,7 @@ const uss = useSelfStream();
 
 const callPeer = (id) => {
   if (uss.value != null) {
-    logit("PEER", "CALLPEER STREAM " + id);
+    logit("PEER", "CALLPEER STREAM " );
     $callPeer(id, uss.value);
   }
 };
